@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>🍕 Güzel Pizza Dükkanı</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{
+  --r:#E8311A;--o:#FF6B2E;--y:#FFD23F;--g:#22c55e;--b:#3b82f6;
+  --pu:#7c3aed;--dk:#1a0a00;--night:#080300;
+  --sh:0 4px 15px rgba(0,0,0,.3);--sh2:0 8px 30px rgba(0,0,0,.4);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{width:100%;height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--night);user-select:none}
+
+/* ── HUD ─────────────────────────────────── */
+#hud{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  background:linear-gradient(135deg,#9a1900,#c72200,#E8311A,#ff5500);
+  padding:5px 8px;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 3px 15px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.12);
+  border-bottom:2px solid rgba(255,80,0,.3); display:none;
+}
+.hi{display:flex;flex-direction:column;align-items:center;color:#fff;line-height:1.1;gap:1px}
+.hv{font-family:'Fredoka One',cursive;font-size:15px;color:var(--y);text-shadow:1px 1px 0 rgba(0,0,0,.5)}
+.hl{font-size:8px;opacity:.8;letter-spacing:.5px;text-transform:uppercase;font-weight:800}
+/* popularity bar */
+.pop-wrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+.pop-bar-bg{width:60px;height:6px;background:rgba(255,255,255,.15);border-radius:3px;overflow:hidden}
+.pop-bar-fill{height:100%;border-radius:3px;transition:width .5s,background .5s}
+.pop-label{font-size:8px;font-weight:800;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+/* prog dots */
+.pdots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;max-width:75px}
+.pd{width:11px;height:6px;border-radius:3px;background:rgba(255,255,255,.18);transition:background .3s}
+.pd.done{background:var(--y)}.pd.cur{background:var(--o);animation:bl .7s ease infinite alternate}
+@keyframes bl{from{opacity:.5}to{opacity:1}}
+
+/* ── SCREENS ─────────────────────────────── */
+.screen{position:fixed;inset:0;display:none;flex-direction:column;overflow:hidden}
+.screen.on{display:flex}
+.pt{padding-top:50px}
+
+/* ── LOBBY ───────────────────────────────── */
+#s-lobby{
+  background:radial-gradient(ellipse at 50% -10%,#ff8030 0%,#c72200 35%,#5a0800 80%,#1a0300 100%);
+  align-items:center;justify-content:flex-start;padding:0 18px 20px;overflow-y:auto;
+}
+.lob-hdr{width:100%;text-align:center;padding:30px 0 16px;background:linear-gradient(180deg,rgba(0,0,0,.35),transparent)}
+.logo-em{font-size:68px;display:block;animation:flt 3s ease-in-out infinite;filter:drop-shadow(0 8px 20px rgba(0,0,0,.5))}
+@keyframes flt{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-12px) rotate(3deg)}}
+.logo-t{font-family:'Fredoka One',cursive;font-size:40px;color:#fff;text-shadow:3px 3px 0 rgba(0,0,0,.4),0 0 30px rgba(255,130,0,.5);line-height:1;margin-bottom:4px}
+.logo-s{color:var(--y);font-size:13px;font-weight:800;letter-spacing:.5px}
+.lob-card{width:100%;max-width:350px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:22px;padding:18px;backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.18);display:flex;flex-direction:column;gap:13px}
+.f-label{display:block;color:rgba(255,255,255,.75);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.inp-w{position:relative}
+.inp-w i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--o);font-size:15px}
+.l-inp{width:100%;padding:12px 14px 12px 40px;border-radius:50px;border:2px solid rgba(255,255,255,.2);font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;background:rgba(255,255,255,.93);color:var(--dk);outline:none;transition:border-color .2s}
+.l-inp:focus{border-color:var(--y)}
+.l-inp::placeholder{color:#bbb;font-weight:600}
+.btn-join{width:100%;padding:15px;background:linear-gradient(135deg,var(--y),#ffb700);color:var(--dk);border:none;border-radius:50px;font-family:'Fredoka One',cursive;font-size:21px;box-shadow:0 5px 0 #a07000,0 7px 20px rgba(255,210,63,.35);cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+.btn-join::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.18),transparent);pointer-events:none}
+.btn-join:active{transform:translateY(4px);box-shadow:0 2px 0 #a07000}
+.btn-join:disabled{opacity:.5;pointer-events:none}
+.lob-st{text-align:center;padding:9px 18px;border-radius:50px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);color:#fff;font-size:13px;font-weight:700;display:none}
+.room-bdg{text-align:center;background:rgba(0,0,0,.4);border:2px solid rgba(255,210,63,.35);border-radius:14px;padding:12px;display:none}
+.room-code{font-family:'Fredoka One',cursive;font-size:36px;color:var(--y);letter-spacing:10px;text-shadow:0 0 20px rgba(255,210,63,.5)}
+.room-clbl{color:rgba(255,255,255,.5);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.w-anim{display:flex;justify-content:center;gap:6px;padding:6px}
+.wd{width:9px;height:9px;border-radius:50%;background:var(--y);animation:wb 1.2s ease infinite}.wd:nth-child(2){animation-delay:.2s}.wd:nth-child(3){animation-delay:.4s}
+@keyframes wb{0%,80%,100%{transform:scale(0);opacity:.3}40%{transform:scale(1);opacity:1}}
+.lob-info{background:rgba(0,0,0,.2);border-radius:14px;padding:12px;color:rgba(255,255,255,.7);font-size:11px;font-weight:700;line-height:1.9;text-align:center}
+.lob-info b{color:var(--y)}
+
+/* ── SHARED ──────────────────────────────── */
+.btn-r{width:100%;padding:14px;background:linear-gradient(135deg,#9a1900,var(--r),var(--o));color:#fff;border:none;border-radius:50px;font-family:'Fredoka One',cursive;font-size:20px;box-shadow:0 5px 0 #7a0000;cursor:pointer;transition:all .15s}
+.btn-r:active{transform:translateY(4px);box-shadow:0 2px 0 #7a0000}
+.btn-g{width:100%;padding:14px;background:linear-gradient(135deg,#14532d,var(--g));color:#fff;border:none;border-radius:50px;font-family:'Fredoka One',cursive;font-size:20px;box-shadow:0 5px 0 #14532d;cursor:pointer;transition:all .15s}
+.btn-g:active{transform:translateY(4px);box-shadow:0 2px 0 #14532d}
+.btn-y{padding:14px 40px;background:linear-gradient(135deg,var(--y),#ffb700);color:var(--dk);border:none;border-radius:50px;font-family:'Fredoka One',cursive;font-size:20px;box-shadow:0 5px 0 #a07000;cursor:pointer;transition:all .15s}
+.btn-y:active{transform:translateY(4px);box-shadow:0 2px 0 #a07000}
+.wait-pill{width:100%;padding:12px;background:rgba(124,58,237,.2);border:2px dashed var(--pu);border-radius:50px;color:#a78bfa;font-family:'Fredoka One',cursive;font-size:15px;text-align:center}
+.da::after{content:'...';animation:dts 1.5s steps(4,end) infinite}
+@keyframes dts{0%,100%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+
+/* ── DISCONNECTED ────────────────────────── */
+#s-dc{background:radial-gradient(ellipse at 50% 50%,#4a0000,#0f0500);align-items:center;justify-content:center;gap:15px;padding:28px}
+.dc-t{font-family:'Fredoka One',cursive;font-size:32px;color:#f87171;text-align:center}
+.dc-s{color:rgba(255,255,255,.7);font-size:14px;font-weight:700;text-align:center;line-height:1.7}
+
+/* ── SELLER ──────────────────────────────── */
+#s-seller{background:linear-gradient(160deg,#fff8ee,#ffe5c8,#ffd0a5)}
+.sel-in{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 13px 8px;overflow-y:auto;gap:9px}
+.rpill{display:inline-flex;align-items:center;gap:6px;color:#fff;border-radius:50px;padding:6px 16px;font-weight:800;font-size:11px;letter-spacing:.8px;text-transform:uppercase;box-shadow:0 3px 10px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.2)}
+.rpill.seller{background:linear-gradient(135deg,#c72200,var(--r),var(--o))}
+.rpill.baker{background:linear-gradient(135deg,#4f46e5,var(--pu))}
+.pname{background:rgba(255,255,255,.22);border-radius:20px;padding:2px 10px;font-size:10px}
+
+/* food type badge */
+.food-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--dk);color:var(--y);border-radius:50px;
+  padding:6px 18px;font-family:'Fredoka One',cursive;font-size:16px;
+  box-shadow:var(--sh);
+}
+
+/* 3D customer card */
+.cust-card{background:#fff;border-radius:20px;padding:13px;width:100%;box-shadow:0 8px 0 #e8bf80,0 11px 25px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.8);border:2px solid rgba(255,195,95,.3);display:flex;flex-direction:column;align-items:center;gap:7px;position:relative}
+.cust-card::before{content:'';position:absolute;inset:0;border-radius:20px;background:linear-gradient(150deg,rgba(255,255,255,.35),transparent 60%);pointer-events:none}
+.cust-em{font-size:56px;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2));animation:cin .4s cubic-bezier(.175,.885,.32,1.275)}
+@keyframes cin{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.cust-nm{font-family:'Fredoka One',cursive;font-size:16px;color:var(--dk);display:flex;align-items:center;gap:6px}
+.patience-tag{font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;background:#fee2e2;color:#dc2626}
+.patience-tag.ok{background:#dcfce7;color:#15803d}
+.patience-tag.mid{background:#fef9c3;color:#a16207}
+
+/* speech bubble */
+.bubble{position:relative;background:linear-gradient(135deg,#e8f4ff,#d0e8ff);border:2px solid #93c5e8;border-radius:14px;padding:11px 13px;font-size:13px;font-weight:700;color:#1a3a5c;text-align:center;line-height:1.55;width:100%;box-shadow:0 4px 12px rgba(0,100,200,.1)}
+.bubble::before{content:'';position:absolute;top:-13px;left:50%;transform:translateX(-50%);border:6px solid transparent;border-bottom-color:#93c5e8}
+.bubble::after{content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);border:5px solid transparent;border-bottom-color:#e8f4ff}
+
+/* order summary */
+.ord-box{background:linear-gradient(135deg,#fff8e8,#fff0d0);border:2px solid rgba(255,175,45,.4);border-radius:14px;padding:11px;width:100%;box-shadow:0 4px 12px rgba(255,150,0,.1)}
+.ord-box h3{font-family:'Fredoka One',cursive;color:var(--r);font-size:13px;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{display:inline-flex;align-items:center;gap:3px;background:#fff;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:800;box-shadow:0 2px 5px rgba(0,0,0,.07)}
+.tag.yes{border:2px solid #16a34a;color:#15803d;background:#f0fdf4}
+.tag.no{border:2px solid var(--r);color:#b91c1c;background:#fff5f5}
+.tag.drink{border:2px solid var(--b);color:#1d4ed8;background:#eff6ff}
+.tag.cut{border:2px solid #0891b2;color:#0e7490;background:#f0f9ff}
+.tag.nocut{border:2px solid var(--pu);color:#6d28d9;background:#faf5ff}
+.tag.qty{background:#fef3c7;border:2px solid #d97706;color:#92400e}
+
+/* price estimate */
+.price-est{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  background:rgba(34,197,94,.12);border:2px solid rgba(34,197,94,.3);
+  border-radius:12px;padding:7px 14px;font-family:'Fredoka One',cursive;
+  font-size:15px;color:#15803d;width:100%;
+}
+
+/* ── KITCHEN ─────────────────────────────── */
+#s-kitchen{background:radial-gradient(ellipse at 50% 0%,#3d1800,#1a0800,#060200);padding-top:50px}
+.kit-in{display:flex;flex-direction:column;height:calc(100% - 50px);overflow:hidden;position:relative}
+
+/* Waiting overlay */
+#bwo{position:absolute;inset:0;z-index:80;background:rgba(6,2,0,.88);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;backdrop-filter:blur(6px)}
+#bwo.on{display:flex}
+.bwo-em{font-size:60px;animation:flt 2s ease-in-out infinite}
+.bwo-t{font-family:'Fredoka One',cursive;font-size:22px;color:var(--y);text-align:center}
+.bwo-s{color:rgba(255,255,255,.55);font-size:12px;font-weight:700;text-align:center;line-height:1.7}
+
+/* Timer bar */
+.timer-bar-wrap{padding:4px 12px 2px;position:relative}
+.timer-bar-bg{width:100%;height:10px;background:rgba(255,255,255,.1);border-radius:5px;overflow:hidden}
+.timer-bar-fill{height:100%;border-radius:5px;transition:width 1s linear,background .5s;background:var(--g);width:100%}
+.timer-info{display:flex;justify-content:space-between;align-items:center;margin-top:2px}
+.timer-txt{font-family:'Fredoka One',cursive;font-size:13px;color:rgba(255,255,255,.7);transition:color .3s}
+.timer-txt.angry{color:#fbbf24;animation:shake .3s ease infinite alternate}
+.timer-txt.veryang{color:#f87171;animation:shake .2s ease infinite alternate}
+@keyframes shake{from{transform:translateX(-2px)}to{transform:translateX(2px)}}
+.food-type-label{
+  text-align:center;font-family:'Fredoka One',cursive;font-size:14px;
+  padding:3px 0;color:var(--y);display:flex;align-items:center;justify-content:center;gap:6px;
+}
+
+/* Shelf */
+.shelf{background:linear-gradient(180deg,#5c2800,#3d1a00,#2a1000);padding:8px 6px 6px;border-bottom:3px solid #1a0800;box-shadow:0 5px 12px rgba(0,0,0,.5)}
+.shelf-t{color:var(--y);font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;text-align:center;opacity:.8}
+.ingr-row{display:flex;justify-content:space-around;align-items:flex-end;overflow-x:auto;gap:4px;padding-bottom:2px}
+.ingr{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:grab;flex-shrink:0;padding:0 2px}
+.ingr:active{cursor:grabbing}
+.bowl{
+  width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;
+  box-shadow:0 5px 0 rgba(0,0,0,.5),0 7px 12px rgba(0,0,0,.5),inset 0 2px 3px rgba(255,255,255,.2),inset 0 -3px 6px rgba(0,0,0,.4);
+  border:3px solid rgba(255,255,255,.12);overflow:hidden;position:relative;transition:transform .15s;
+}
+.bowl::after{content:'';position:absolute;top:5px;left:8px;width:38%;height:28%;background:rgba(255,255,255,.25);border-radius:50%;transform:rotate(-30deg);pointer-events:none}
+.bowl:active{transform:scale(.88) translateY(3px)}
+.b-sauce{background:radial-gradient(circle at 38% 33%,#ff7070,#cc0000,#7a0000)}
+.b-cheese{background:radial-gradient(circle at 38% 33%,#ffee66,#ffc200,#cc8800)}
+.b-sucuk{background:radial-gradient(circle at 38% 33%,#cc7a45,#8B4513,#4a1800)}
+.b-sosis{background:radial-gradient(circle at 38% 33%,#ffd080,#ff9933,#cc6000)}
+.b-mushroom{background:radial-gradient(circle at 38% 33%,#d4a,#8b6,#5a4)}
+.b-olive{background:radial-gradient(circle at 38% 33%,#6b6,#4a4,#222)}
+.b-meat{background:radial-gradient(circle at 38% 33%,#c87050,#8B3a1a,#5a1a00)}
+.b-cabbage{background:radial-gradient(circle at 38% 33%,#88cc88,#448844,#224422)}
+.b-tomato{background:radial-gradient(circle at 38% 33%,#ff7766,#cc3322,#881100)}
+.b-patty{background:radial-gradient(circle at 38% 33%,#c87050,#7B3010,#4a1500)}
+.b-lettuce{background:radial-gradient(circle at 38% 33%,#88ee88,#44aa44,#226622)}
+.b-pickle{background:radial-gradient(circle at 38% 33%,#aad44a,#66aa22,#336611)}
+.b-onion{background:radial-gradient(circle at 38% 33%,#ffccaa,#cc8844,#885522)}
+.ingr-lbl{color:rgba(255,255,255,.7);font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;text-align:center;max-width:52px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ingr-cnt{font-family:'Fredoka One',cursive;font-size:11px;color:var(--y);min-height:14px;text-align:center}
+
+/* Drink toggle */
+.drink-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  background:rgba(59,130,246,.15);border:2px solid rgba(59,130,246,.3);
+  border-radius:50px;padding:6px 14px;cursor:pointer;transition:all .2s;color:#93c5fd;
+  font-size:12px;font-weight:800;margin:2px 12px 0;
+}
+.drink-btn.on{background:rgba(59,130,246,.3);border-color:#3b82f6;color:#fff;box-shadow:0 0 12px rgba(59,130,246,.4)}
+.drink-btn i{font-size:16px}
+
+/* Pizza/Food workspace */
+.food-area{flex:1;display:flex;align-items:center;justify-content:center;padding:6px;position:relative;min-height:0}
+
+/* === PIZZA === */
+.pizza-ws{position:relative;width:200px;height:200px;flex-shrink:0;filter:drop-shadow(0 14px 28px rgba(0,0,0,.65))}
+.p-shadow{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);width:185px;height:26px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.55),transparent 70%);pointer-events:none}
+.p-base{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 33% 28%,#f5deb3,#e8b870 28%,#c8822a 58%,#8B5a1f 84%,#6b3a0f 100%);box-shadow:0 -2px 0 #c8731a,0 3px 0 #8B4513,inset 0 3px 8px rgba(255,220,150,.35),inset 0 -4px 12px rgba(0,0,0,.45);overflow:hidden}
+.p-crust{position:absolute;inset:0;border-radius:50%;background:transparent;border:16px solid transparent;box-shadow:inset 0 0 0 16px #c8731a;pointer-events:none;z-index:4}
+.p-tops{position:absolute;top:16px;left:16px;width:168px;height:168px;border-radius:50%;overflow:hidden;pointer-events:none;z-index:2}
+#p-canvas{position:absolute;inset:0;width:200px;height:200px;border-radius:50%;z-index:6;cursor:crosshair}
+
+/* === DÖNER === */
+.doner-ws{position:relative;width:180px;height:210px;flex-shrink:0;filter:drop-shadow(0 14px 28px rgba(0,0,0,.65))}
+.doner-wrap{
+  position:absolute;inset:0;border-radius:20px 20px 30px 30px;
+  background:radial-gradient(ellipse at 50% 20%,#f5deb3,#daa060 40%,#c8822a 70%);
+  box-shadow:0 -2px 0 #c8731a,0 4px 0 #8B4513,inset 0 3px 8px rgba(255,220,150,.35);
+  overflow:hidden;display:flex;flex-direction:column;
+}
+.doner-top{height:40px;background:radial-gradient(circle at 50% 120%,#f5deb3,#daa060);border-bottom:3px solid rgba(200,100,30,.5)}
+.doner-fill{flex:1;background:linear-gradient(180deg,rgba(180,80,30,.8),rgba(140,50,20,.9));position:relative;overflow:hidden}
+.doner-tops{position:absolute;inset:0}
+.doner-bottom{height:30px;background:#c8731a;border-top:2px solid rgba(255,200,100,.3)}
+
+/* === BURGER === */
+.burger-ws{position:relative;width:190px;height:170px;flex-shrink:0;filter:drop-shadow(0 14px 28px rgba(0,0,0,.65))}
+.burger-stack{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between}
+.bun-top{height:65px;background:radial-gradient(ellipse at 50% 110%,#f0c070,#d4903a 50%,#c07830 80%);border-radius:50% 50% 5px 5px;box-shadow:0 -2px 0 #c07830,inset 0 5px 10px rgba(255,220,100,.3)}
+.burger-mid{flex:1;background:linear-gradient(180deg,rgba(180,80,30,.9),rgba(100,40,10,.95));position:relative;overflow:hidden}
+.burger-tops{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-around;padding:3px 6px}
+.bun-bot{height:30px;background:radial-gradient(ellipse at 50% -30%,#f0c070,#c8872a 60%);border-radius:5px 5px 15px 15px;box-shadow:0 3px 0 #8B5a1f}
+
+.t-layer{position:absolute;inset:0;border-radius:50%;overflow:hidden;transition:opacity .4s}
+.t-sauce{background:radial-gradient(circle at 50%,rgba(210,20,20,.9) 0%,rgba(170,15,15,.75) 55%,transparent 72%)}
+.t-cheese{background:radial-gradient(circle at 30% 28%,rgba(255,235,100,.85),rgba(255,200,50,.65) 45%,transparent 65%),radial-gradient(circle at 72% 58%,rgba(255,215,80,.7),transparent 45%),radial-gradient(circle at 48% 82%,rgba(240,195,55,.6),transparent 38%)}
+.t-dot{position:absolute;border-radius:50%;pointer-events:none;transition:opacity .2s}
+
+/* Tools */
+.tools-row{display:flex;gap:6px;align-items:center;justify-content:center;padding:5px 8px}
+.tbtn{display:flex;flex-direction:column;align-items:center;gap:2px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.12);border-radius:12px;padding:7px 12px;cursor:pointer;transition:all .15s;color:#fff;box-shadow:0 3px 6px rgba(0,0,0,.3)}
+.tbtn.on{background:rgba(255,215,63,.18);border-color:var(--y);box-shadow:0 0 12px rgba(255,215,63,.3)}
+.tbtn:active{transform:scale(.93)}
+.ticon{font-size:20px}.tlbl{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.3px}
+.cut-st{color:rgba(255,255,255,.45);font-size:11px;font-weight:800;text-align:center;padding:0 6px 3px;min-height:16px;transition:color .3s}
+.cut-st.on{color:var(--y)}
+
+/* Live price display */
+.live-price{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:3px 12px 2px;font-family:'Fredoka One',cursive;font-size:13px;color:rgba(255,255,255,.5);
+}
+.lp-val{color:var(--g);font-size:16px}
+.lp-cost{color:#f87171}
+
+/* Angry customer face */
+.angry-face{
+  position:absolute;top:4px;right:8px;font-size:28px;z-index:50;
+  display:none;animation:angshk .3s ease infinite alternate;
+}
+.angry-face.show{display:block}
+@keyframes angshk{from{transform:rotate(-8deg) scale(1)}to{transform:rotate(8deg) scale(1.1)}}
+
+/* ── GHOST ───────────────────────────────── */
+#ghost{position:fixed;pointer-events:none;font-size:42px;z-index:9999;transform:translate(-50%,-50%) scale(1.1);display:none;filter:drop-shadow(0 5px 10px rgba(0,0,0,.6))}
+
+/* ── EVALUATION ──────────────────────────── */
+#s-eval{background:radial-gradient(ellipse at 50% 100%,#3d1800,#1a0800,#040100);align-items:center;justify-content:center;padding:14px;gap:9px}
+.ev-t{font-family:'Fredoka One',cursive;font-size:26px;color:var(--y);text-align:center;text-shadow:0 0 20px rgba(255,210,63,.5)}
+.ev-cust{font-size:50px}
+.ev-food-preview{position:relative;width:110px;height:110px;margin:0 auto}
+.ev-base{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 33% 28%,#f5deb3,#daa060 35%,#c8822a 68%);box-shadow:0 -2px 0 #c8731a,0 3px 0 #8B4513;overflow:hidden}
+.ev-crust{position:absolute;inset:0;border-radius:50%;border:10px solid #c8731a;pointer-events:none;z-index:4}
+.ev-tops{position:absolute;top:10px;left:10px;width:90px;height:90px;border-radius:50%;overflow:hidden;z-index:2}
+.ev-shadow{position:absolute;bottom:-12px;left:50%;transform:translateX(-50%);width:100px;height:18px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.45),transparent 70%)}
+.stars{display:flex;gap:4px;font-size:32px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+.ev-fb{background:rgba(255,255,255,.06);border-radius:14px;padding:11px 16px;color:#fff;font-size:13px;font-weight:700;text-align:center;line-height:1.65;border:1px solid rgba(255,255,255,.1);max-width:300px;white-space:pre-line}
+/* breakdown */
+.ev-breakdown{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.evb-item{display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,.06);border-radius:10px;padding:6px 12px;font-family:'Fredoka One',cursive;font-size:14px;min-width:60px}
+.evb-val{color:var(--y)}.evb-lbl{font-size:9px;color:rgba(255,255,255,.5);font-family:'Nunito',sans-serif;font-weight:800;text-transform:uppercase}
+.evb-item.earned{border:1px solid rgba(34,197,94,.3)}.evb-item.earned .evb-val{color:#4ade80}
+.evb-item.cost{border:1px solid rgba(248,113,113,.3)}.evb-item.cost .evb-val{color:#f87171}
+.evb-item.net{border:1px solid rgba(251,191,36,.3)}.evb-item.net .evb-val{color:var(--y)}
+.evb-item.pop{border:1px solid rgba(167,139,250,.3)}.evb-item.pop .evb-val{color:#a78bfa}
+.evb-item.spd{border:1px solid rgba(56,189,248,.3)}.evb-item.spd .evb-val{color:#38bdf8}
+
+/* ── ROLE SWITCH ─────────────────────────── */
+#s-rs{background:radial-gradient(ellipse at 50%,#3a0060,#1a0040,#050010);align-items:center;justify-content:center;gap:14px;padding:26px}
+.rs-t{font-family:'Fredoka One',cursive;font-size:34px;color:var(--y);text-align:center;text-shadow:0 0 22px rgba(255,210,63,.5);animation:pls .8s ease infinite alternate}
+@keyframes pls{from{transform:scale(1)}to{transform:scale(1.04)}}
+.rs-icon{font-size:56px;animation:spin360 3s linear infinite}
+@keyframes spin360{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.rs-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);border-radius:18px;padding:16px;color:#fff;font-size:14px;font-weight:700;text-align:center;line-height:1.9;width:100%}
+.rs-card .hl{color:var(--y)}.rs-card .hl2{color:#a78bfa}
+
+/* ── GAMEOVER / WIN ──────────────────────── */
+#s-over{background:radial-gradient(ellipse at 50%,#4a0000,#1a0000,#030000);align-items:center;justify-content:center;gap:11px;padding:26px}
+.ov-t{font-family:'Fredoka One',cursive;font-size:50px;color:#f87171;text-align:center;text-shadow:0 0 28px rgba(248,113,113,.7);animation:shk .5s ease infinite alternate}
+@keyframes shk{from{transform:rotate(-3deg) scale(.97)}to{transform:rotate(3deg) scale(1.03)}}
+.ov-stats{background:rgba(255,255,255,.05);border:1px solid rgba(248,113,113,.18);border-radius:18px;padding:16px;color:#fff;font-size:13px;line-height:2;text-align:center;width:100%}
+.ov-stats b{color:var(--y)}
+#s-win{background:radial-gradient(ellipse at 50%,#004500,#001800,#000400);align-items:center;justify-content:center;gap:11px;padding:26px}
+.wn-t{font-family:'Fredoka One',cursive;font-size:36px;color:var(--y);text-align:center;text-shadow:0 0 22px rgba(255,210,63,.6)}
+.cftti{font-size:68px;animation:flt 2s ease-in-out infinite}
+.wn-stats{background:rgba(255,255,255,.07);border:1px solid rgba(255,215,63,.18);border-radius:18px;padding:16px;color:#fff;font-size:13px;line-height:2;text-align:center;width:100%}
+.wn-stats b{color:var(--y)}
+
+/* ── CHAT FAB ────────────────────────────── */
+#chat-fab{position:fixed;bottom:16px;right:14px;z-index:400;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--pu),#4f46e5);border:none;color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 0 #3730a3,0 5px 18px rgba(124,58,237,.5);display:none;align-items:center;justify-content:center;transition:all .15s}
+#chat-fab:active{transform:translateY(3px);box-shadow:0 1px 0 #3730a3}
+.cbadge{position:absolute;top:-4px;right:-4px;width:17px;height:17px;border-radius:50%;background:#ef4444;color:#fff;font-size:9px;font-weight:900;display:none;align-items:center;justify-content:center;border:2px solid #0a0300}
+
+/* ── CHAT POPUP ──────────────────────────── */
+#chat-pop{
+  position:fixed;bottom:76px;right:10px;left:10px;z-index:500;
+  background:linear-gradient(160deg,#1e0a3a,#110530);border:1px solid rgba(124,58,237,.35);
+  border-radius:18px;box-shadow:0 8px 28px rgba(0,0,0,.7);
+  display:none;flex-direction:column;max-height:330px;overflow:hidden;
+  transform:translateY(18px) scale(.96);opacity:0;transition:transform .22s cubic-bezier(.175,.885,.32,1.275),opacity .22s;
+}
+#chat-pop.open{display:flex;transform:translateY(0) scale(1);opacity:1}
+.ch-hdr{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(124,58,237,.2);background:rgba(124,58,237,.18)}
+.ch-hdr h3{font-family:'Fredoka One',cursive;color:var(--y);font-size:15px;display:flex;align-items:center;gap:6px}
+.ch-close{background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.6);border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center}
+.ebar{display:flex;gap:4px;padding:5px 10px 2px;overflow-x:auto}.ebar::-webkit-scrollbar{display:none}
+.ebtn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:50%;width:30px;height:30px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ebtn:active{background:rgba(255,255,255,.18)}
+#chat-msgs{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px;min-height:50px;max-height:200px}
+#chat-msgs::-webkit-scrollbar{width:3px}
+#chat-msgs::-webkit-scrollbar-thumb{background:rgba(124,58,237,.4);border-radius:2px}
+.cmsg{max-width:82%;padding:6px 10px;border-radius:12px;font-size:12px;font-weight:700;line-height:1.45;word-break:break-word;animation:mIn .18s ease}
+@keyframes mIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.cmsg.mine{align-self:flex-end;background:linear-gradient(135deg,var(--pu),#6d28d9);color:#fff;border-bottom-right-radius:3px;box-shadow:0 2px 6px rgba(124,58,237,.35)}
+.cmsg.their{align-self:flex-start;background:rgba(255,255,255,.09);color:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.08);border-bottom-left-radius:3px}
+.cmsg .mn{font-size:9px;opacity:.6;margin-bottom:2px;font-weight:900}
+.cempty{color:rgba(255,255,255,.28);font-size:12px;font-weight:700;text-align:center;padding:14px}
+.ch-inp-row{display:flex;gap:7px;padding:8px 10px;border-top:1px solid rgba(124,58,237,.15);background:rgba(0,0,0,.25)}
+#ch-inp{flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(124,58,237,.25);border-radius:50px;padding:8px 12px;color:#fff;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;outline:none}
+#ch-inp::placeholder{color:rgba(255,255,255,.28)}
+#ch-inp:focus{border-color:var(--pu)}
+#ch-send{background:linear-gradient(135deg,var(--pu),#4f46e5);border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 6px rgba(124,58,237,.35);flex-shrink:0}
+#ch-send:active{transform:scale(.9)}
+
+/* ── FLOAT TEXT ──────────────────────────── */
+.ft{position:fixed;font-family:'Fredoka One',cursive;font-size:20px;pointer-events:none;z-index:9998;animation:fu 1.2s ease-out forwards}
+@keyframes fu{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-75px) scale(1.4)}}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,107,46,.4);border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- ══ HUD ══════════════════════════════════ -->
+<div id="hud">
+  <div class="hi">
+    <span class="hl"><i class="fa fa-sun"></i> GÜN</span>
+    <span class="hv" id="h-day">1</span>
+  </div>
+  <div class="hi">
+    <div class="pdots" id="h-prog"></div>
+    <span class="hl" id="h-ct">0/10</span>
+  </div>
+  <div class="hi">
+    <span class="hl"><i class="fa fa-lira-sign"></i> KASA</span>
+    <span class="hv" id="h-money">150₺</span>
+  </div>
+  <div class="pop-wrap">
+    <div class="pop-bar-bg"><div class="pop-bar-fill" id="pop-fill" style="width:2%;background:#888"></div></div>
+    <span class="pop-label" id="pop-label" style="color:#888">👻 Bilinmez</span>
+    <span class="hl">POPÜLERLİK</span>
+  </div>
+  <div class="hi">
+    <span class="hl"><i class="fa fa-star"></i> PUAN</span>
+    <span class="hv" id="h-score">0</span>
+  </div>
+</div>
+
+<!-- DRAG GHOST -->
+<div id="ghost">🍅</div>
+
+<!-- ══ LOBBY ═════════════════════════════════ -->
+<div id="s-lobby" class="screen on">
+  <div class="lob-hdr">
+    <span class="logo-em">🍕</span>
+    <div class="logo-t">Güzel Pizza<br>Dükkanı</div>
+    <div class="logo-s"><i class="fa fa-store"></i> &nbsp;Pizza • Döner • Burger</div>
+  </div>
+  <div class="lob-card">
+    <div>
+      <label class="f-label"><i class="fa fa-user"></i> &nbsp;Kullanıcı Adın</label>
+      <div class="inp-w">
+        <i class="fa fa-user-chef"></i>
+        <input class="l-inp" id="name-inp" type="text" maxlength="20" placeholder="Adın..." autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+    <button class="btn-join" id="btn-join" onclick="joinLobby()">
+      <i class="fa fa-door-open"></i> &nbsp;Odaya Katıl!
+    </button>
+    <div class="lob-st" id="lob-st"></div>
+    <div class="room-bdg" id="room-bdg">
+      <div class="room-clbl"><i class="fa fa-hashtag"></i> ODA KODU</div>
+      <div class="room-code" id="room-code">----</div>
+      <div style="color:rgba(255,255,255,.45);font-size:10px;font-weight:700;margin-top:4px">Arkadaşına bu kodu söyle!</div>
+      <div class="w-anim"><div class="wd"></div><div class="wd"></div><div class="wd"></div></div>
+    </div>
+  </div>
+  <div class="lob-info">
+    <b><i class="fa fa-pizza-slice"></i> Pizza &nbsp; <i class="fa fa-bread-slice"></i> Döner &nbsp; <i class="fa fa-burger"></i> Burger</b><br>
+    <b><i class="fa fa-mug-saucer"></i> İçecek</b> siparişleri de gelebilir!<br>
+    2 oyuncu bağlanınca roller <b>otomatik</b> atanır<br>
+    <b>Satıcı</b> siparişi alır → <b>Fırıncı</b> hazırlar<br>
+    Her günün sonunda roller değişir!
+  </div>
+</div>
+
+<!-- ══ DISCONNECTED ═══════════════════════════ -->
+<div id="s-dc" class="screen">
+  <div style="font-size:68px"><i class="fa fa-plug-circle-xmark" style="color:#f87171"></i></div>
+  <div class="dc-t">Bağlantı Kesildi!</div>
+  <div class="dc-s">Diğer oyuncu ayrıldı.</div>
+  <button class="btn-y" onclick="goLobby()" style="margin-top:6px">
+    <i class="fa fa-house"></i> &nbsp;Lobiye Dön
+  </button>
+</div>
+
+<!-- ══ SELLER SCREEN ══════════════════════════ -->
+<div id="s-seller" class="screen pt">
+  <div class="sel-in">
+    <div class="rpill seller" id="sel-pill">
+      <i class="fa fa-cash-register"></i> SATICI
+      <span class="pname" id="sel-pname">Sen</span>
+    </div>
+
+    <div class="cust-card">
+      <div class="cust-em" id="cust-em">👨</div>
+      <div class="cust-nm">
+        <span id="cust-nm">Müşteri</span>
+        <span class="patience-tag ok" id="pat-tag"><i class="fa fa-clock"></i> Sabırlı</span>
+      </div>
+      <div class="bubble" id="cust-order">...</div>
+    </div>
+
+    <div class="ord-box">
+      <h3><i class="fa fa-clipboard-list"></i> Sipariş Özeti</h3>
+      <div class="tags" id="ord-tags"></div>
+    </div>
+
+    <div class="price-est" id="price-est">
+      <i class="fa fa-circle-dollar-to-slot"></i>
+      Tahmini Gelir: <span id="est-price">~35₺</span>
+    </div>
+
+    <div style="background:rgba(255,107,46,.08);border:2px dashed rgba(255,107,46,.3);border-radius:12px;padding:10px 13px;width:100%;text-align:center">
+      <strong style="display:block;font-size:12px;font-weight:800;color:var(--dk);margin-bottom:3px"><i class="fa fa-bullhorn"></i> Fırıncıya Sesli Söyle!</strong>
+      <span style="font-size:11px;color:#777">Siparişi oku, partnerine söyle ve telefonu ver.</span>
+    </div>
+
+    <button class="btn-r" id="btn-kitchen" onclick="doKitchen()">
+      <i class="fa fa-fire-flame-curved"></i> &nbsp;Fırına Gönder →
+    </button>
+    <div class="wait-pill" id="wait-sel" style="display:none">
+      <i class="fa fa-hourglass-half"></i> &nbsp;Satıcı gönderecek<span class="da"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ══ KITCHEN SCREEN ════════════════════════ -->
+<div id="s-kitchen" class="screen">
+  <div class="kit-in">
+    <!-- Baker waiting overlay -->
+    <div id="bwo">
+      <div class="bwo-em">🍳</div>
+      <div class="bwo-t"><i class="fa fa-fire"></i> Fırıncı Çalışıyor...</div>
+      <div class="bwo-s" id="bwo-txt">Partner hazırlıyor...<br>Birazdan değerlendirme yapacaksın!</div>
+    </div>
+
+    <!-- Angry face indicator -->
+    <div class="angry-face" id="angry-face">😤</div>
+
+    <!-- Role bar + timer -->
+    <div style="background:rgba(255,107,46,.15);border-bottom:1px solid rgba(255,107,46,.22);padding:4px 10px">
+      <div class="food-type-label" id="food-type-lbl">
+        <i class="fa fa-hat-chef"></i> <span id="kit-role-txt">FIRINCI EKRANI</span>
+      </div>
+    </div>
+
+    <div class="timer-bar-wrap">
+      <div class="timer-bar-bg"><div class="timer-bar-fill" id="timer-fill"></div></div>
+      <div class="timer-info">
+        <span class="timer-txt" id="timer-txt"><i class="fa fa-clock"></i> 45s</span>
+        <span class="live-price">
+          <i class="fa fa-coins" style="color:#fbbf24"></i>
+          <span class="lp-val" id="lp-earn">+0₺</span>
+          <span style="opacity:.4">|</span>
+          <span class="lp-cost" id="lp-cost">-0₺</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Ingredients shelf -->
+    <div class="shelf">
+      <div class="shelf-t"><i class="fa fa-jar"></i> &nbsp;Malzemeler — Sürükle & Yemeğin Üstüne Bırak</div>
+      <div class="ingr-row" id="ingr-row">
+        <!-- Dynamic ingredients injected here -->
+      </div>
+    </div>
+
+    <!-- Drink toggle -->
+    <div class="drink-btn" id="drink-btn" onclick="doDrink()">
+      <i class="fa fa-mug-saucer"></i>
+      <span id="drink-btn-txt">İçecek Ekle</span>
+    </div>
+
+    <!-- Food area -->
+    <div class="food-area" id="food-area">
+      <!-- Dynamic food workspace injected here -->
+    </div>
+
+    <div class="tools-row">
+      <div class="tbtn" id="t-knife" onclick="doCut()">
+        <span class="ticon"><i class="fa fa-knife"></i></span>
+        <span class="tlbl">Kes</span>
+      </div>
+      <div class="tbtn" id="t-reset" onclick="doReset()">
+        <span class="ticon"><i class="fa fa-rotate-left"></i></span>
+        <span class="tlbl">Sıfırla</span>
+      </div>
+    </div>
+    <div class="cut-st" id="cut-st"><i class="fa fa-circle-xmark"></i> Kesilmemiş</div>
+
+    <div style="padding:0 12px 10px">
+      <button class="btn-g" id="btn-serve" onclick="doServe()">
+        <i class="fa fa-plate-wheat"></i> &nbsp;Hazır! Servis Et!
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ EVALUATION ════════════════════════════ -->
+<div id="s-eval" class="screen pt">
+  <div class="ev-t" id="ev-t">🎉 Mükemmel!</div>
+  <div class="ev-cust" id="ev-cust">👨</div>
+  <div class="ev-food-preview" id="ev-food-preview">
+    <div class="ev-base"><div class="ev-tops" id="ev-tops"></div></div>
+    <div class="ev-crust"></div>
+    <div class="ev-shadow"></div>
+  </div>
+  <div class="stars" id="ev-stars">⭐⭐⭐</div>
+  <div class="ev-fb" id="ev-fb">Harika!</div>
+  <div class="ev-breakdown" id="ev-breakdown"></div>
+  <button class="btn-r" id="btn-next" onclick="doNext()" style="width:260px">
+    <i class="fa fa-forward"></i> &nbsp;Sıradaki Müşteri
+  </button>
+  <div class="wait-pill" id="wait-eval" style="display:none">
+    <i class="fa fa-hourglass-half"></i> Satıcı devam edecek<span class="da"></span>
+  </div>
+</div>
+
+<!-- ══ ROLE SWITCH ═══════════════════════════ -->
+<div id="s-rs" class="screen pt">
+  <div class="rs-t"><i class="fa fa-rotate"></i> ROLLER<br>DEĞİŞİYOR!</div>
+  <div class="rs-icon">🔄</div>
+  <div class="rs-card" id="rs-card">
+    <span class="hl" id="rs-day"></span><br>
+    Roller değişiyor…<br><br>
+    <span class="hl" id="rs-sel"></span><br>
+    <span class="hl2" id="rs-bak"></span>
+  </div>
+  <button class="btn-y" id="btn-newday" onclick="doNewDay()">
+    <i class="fa fa-sun"></i> &nbsp;Yeni Güne Başla!
+  </button>
+  <div class="wait-pill" id="wait-rs" style="display:none">
+    <i class="fa fa-hourglass-half"></i> Satıcı başlatacak<span class="da"></span>
+  </div>
+</div>
+
+<!-- ══ GAMEOVER ═══════════════════════════════ -->
+<div id="s-over" class="screen pt">
+  <div class="ov-t"><i class="fa fa-skull-crossbones"></i> BATTIK!</div>
+  <div style="font-size:68px">😱</div>
+  <div class="ov-stats">
+    <i class="fa fa-store-slash"></i> Kasa tamamen boşaldı!<br><br>
+    Gün: <b id="go-day">1</b> &nbsp; Puan: <b id="go-score">0</b><br>
+    Müşteri: <b id="go-custs">0</b> &nbsp; Popülerlik: <b id="go-pop">0</b><br>
+    Mükemmel Sipariş: <b id="go-perf">0</b> &nbsp; Başarısız: <b id="go-fail">0</b>
+  </div>
+  <button class="btn-y" onclick="doRestart()" style="width:100%">
+    <i class="fa fa-rotate-right"></i> &nbsp;Tekrar Oyna
+  </button>
+</div>
+
+<!-- ══ WIN ════════════════════════════════════ -->
+<div id="s-win" class="screen pt">
+  <div class="wn-t"><i class="fa fa-trophy"></i> TEBRİKLER!<br>BAŞARDIK!</div>
+  <div class="cftti">🎊</div>
+  <div class="wn-stats">
+    Harika bir oyun!<br><br>
+    Kasa: <b id="wn-money">0₺</b> &nbsp; Puan: <b id="wn-score">0</b><br>
+    Toplam Kazanç: <b id="wn-earned">0₺</b><br>
+    Mükemmel: <b id="wn-perf">0</b> &nbsp; Servis: <b id="wn-served">0</b>
+  </div>
+  <button class="btn-y" onclick="doRestart()" style="width:100%">
+    <i class="fa fa-redo"></i> &nbsp;Yeni Oyun
+  </button>
+</div>
+
+<!-- ══ CHAT FAB ══════════════════════════════ -->
+<button id="chat-fab" onclick="toggleChat()">
+  <i class="fa fa-comments"></i>
+  <span class="cbadge" id="cbadge">0</span>
+</button>
+
+<!-- ══ CHAT POPUP ════════════════════════════ -->
+<div id="chat-pop">
+  <div class="ch-hdr">
+    <h3><i class="fa fa-comments" style="color:var(--pu)"></i> Sohbet</h3>
+    <button class="ch-close" onclick="toggleChat()"><i class="fa fa-xmark"></i></button>
+  </div>
+  <div class="ebar" id="ebar"></div>
+  <div id="chat-msgs">
+    <div class="cempty"><i class="fa fa-comment-dots"></i> Henüz mesaj yok...</div>
+  </div>
+  <div class="ch-inp-row">
+    <input id="ch-inp" type="text" placeholder="Mesaj yaz..." maxlength="120" autocomplete="off" spellcheck="false">
+    <button id="ch-send" onclick="sendChat()"><i class="fa fa-paper-plane"></i></button>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+'use strict';
+
+/* ════════════════════════════════════════
+   AUDIO ENGINE
+════════════════════════════════════════ */
+const AC = new (window.AudioContext || window.webkitAudioContext)();
+const unlockAC = () => { AC.resume(); };
+document.addEventListener('touchstart', unlockAC, {once:true});
+document.addEventListener('mousedown', unlockAC, {once:true});
+
+function beep(freq=440,type='sine',dur=.12,vol=.3,delay=0){
+  try{const g=AC.createGain(),o=AC.createOscillator();o.type=type;o.frequency.setValueAtTime(freq,AC.currentTime+delay);g.gain.setValueAtTime(0,AC.currentTime+delay);g.gain.linearRampToValueAtTime(vol,AC.currentTime+delay+.01);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+delay+dur);o.connect(g);g.connect(AC.destination);o.start(AC.currentTime+delay);o.stop(AC.currentTime+delay+dur+.05);}catch(e){}
+}
+function noise(dur=.08,vol=.15){
+  try{const b=AC.createBuffer(1,AC.sampleRate*dur,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const s=AC.createBufferSource(),g=AC.createGain();s.buffer=b;g.gain.setValueAtTime(vol,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+dur);s.connect(g);g.connect(AC.destination);s.start();}catch(e){}
+}
+const SFX={
+  drop:()=>{noise(.05,.18);beep(180,'sawtooth',.07,.1);},
+  sauce:()=>{beep(220,'sine',.14,.22);beep(290,'sine',.1,.18,.07);},
+  cheese:()=>{beep(440,'triangle',.1,.2);beep(550,'triangle',.1,.15,.06);},
+  meat:()=>{noise(.06,.25);beep(180,'sawtooth',.09,.18,.04);},
+  veg:()=>{beep(660,'sine',.08,.15);beep(800,'sine',.06,.12,.04);},
+  cut:()=>{noise(.06,.28);beep(800,'sawtooth',.08,.22);beep(600,'sawtooth',.06,.18,.05);},
+  drink:()=>{beep(660,'sine',.1,.2);beep(880,'sine',.08,.15,.06);},
+  serve:()=>{[0,.07,.13].forEach((d,i)=>beep([523,659,784][i],'sine',.2,.22,d));},
+  stars3:()=>{[0,.09,.18,.27,.36,.45].forEach((d,i)=>beep([523,659,784,1047,1319,1568][i],'triangle',.28,.22,d));},
+  stars2:()=>{beep(440,'triangle',.2,.2);beep(550,'triangle',.2,.15,.1);},
+  stars0:()=>{[0,.1,.2].forEach((d,i)=>beep([220,196,180][i],'sawtooth',.25,.3,d));},
+  timer_warn:()=>beep(440,'sine',.08,.3),
+  timer_crit:()=>{beep(600,'sawtooth',.06,.4);},
+  chat:()=>{beep(880,'sine',.07,.18);beep(1100,'sine',.05,.14,.05);},
+  role:()=>{[0,.08,.16,.24].forEach((d,i)=>beep([392,523,392,523][i],'triangle',.14,.2,d));},
+  lobby:()=>{beep(660,'triangle',.18,.22);beep(880,'triangle',.18,.18,.11);},
+  err:()=>{beep(200,'sawtooth',.14,.28);beep(180,'sawtooth',.14,.24,.08);},
+  coin:()=>{beep(1047,'triangle',.12,.25);beep(1319,'triangle',.1,.2,.08);},
+};
+
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+let socket=null,myId=null,myName='',room=null,meta=null;
+let chatOpen=false,unread=0,drag={on:false,ing:null};
+let timerInterval=null;
+const QUICK_EMOJIS=['😂','👍','🔥','😱','🤌','💪','😍','🙈','🎉','😤','👏','❤️','🍕','🌯','🍔'];
+
+/* ════════════════════════════════════════
+   SCREEN
+════════════════════════════════════════ */
+function showS(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('s-'+id).classList.add('on');
+  const noHud=['lobby','dc'];
+  document.getElementById('hud').style.display=noHud.includes(id)?'none':'flex';
+  const gameFab=['seller','kitchen','eval','rs','over','win'];
+  document.getElementById('chat-fab').style.display=gameFab.includes(id)?'flex':'none';
+}
+
+/* ════════════════════════════════════════
+   SOCKET
+════════════════════════════════════════ */
+function initSocket(){
+  socket=io({transports:['websocket','polling']});
+  socket.on('connect',()=>{myId=socket.id;});
+  socket.on('room_update',data=>{room=data;meta=data.meta||meta;renderRoom(data);});
+  socket.on('chat_history',msgs=>msgs.forEach(m=>appendMsg(m)));
+  socket.on('chat_msg',m=>{appendMsg(m);if(!chatOpen){unread++;showBadge();SFX.chat();}});
+  socket.on('timer_tick',({remaining,angry,veryAngry})=>renderTimer(remaining,angry,veryAngry));
+  socket.on('disconnect',()=>{if(room?.status==='playing')showS('dc');});
+}
+
+/* ════════════════════════════════════════
+   LOBBY
+════════════════════════════════════════ */
+function joinLobby(){
+  const name=document.getElementById('name-inp').value.trim();
+  if(!name){document.getElementById('name-inp').focus();SFX.err();return;}
+  myName=name;
+  document.getElementById('btn-join').disabled=true;
+  const st=document.getElementById('lob-st');
+  st.style.display='block';
+  st.innerHTML='<i class="fa fa-circle-notch fa-spin"></i> Oda aranıyor…';
+  if(!socket)initSocket();
+  socket.emit('join_lobby',{name});SFX.lobby();
+}
+document.getElementById('name-inp').addEventListener('keydown',e=>{if(e.key==='Enter')joinLobby();});
+
+function goLobby(){
+  room=null;
+  document.getElementById('btn-join').disabled=false;
+  document.getElementById('lob-st').style.display='none';
+  document.getElementById('room-bdg').style.display='none';
+  document.getElementById('chat-msgs').innerHTML='<div class="cempty"><i class="fa fa-comment-dots"></i> Henüz mesaj yok...</div>';
+  unread=0;showBadge();showS('lobby');
+}
+
+/* ════════════════════════════════════════
+   RENDER ROOM
+════════════════════════════════════════ */
+function renderRoom(r){
+  if(r.status==='waiting'){
+    document.getElementById('lob-st').style.display='block';
+    document.getElementById('lob-st').innerHTML='<i class="fa fa-user-clock"></i> 2. Oyuncu Bekleniyor…';
+    document.getElementById('room-bdg').style.display='block';
+    document.getElementById('room-code').textContent=r.code;
+    showS('lobby');return;
+  }
+  const st=r.state;
+  updateHUD(st);
+  const isSel=st.sellerSocketId===myId,isBak=st.bakerSocketId===myId;
+  switch(st.phase){
+    case 'seller': renderSeller(r,st,isSel); break;
+    case 'kitchen': renderKitchen(r,st,isBak); break;
+    case 'eval': renderEval(r,st,isSel); break;
+    case 'roleswitch': renderRS(r,st); break;
+    case 'gameover': renderOver(st); break;
+    case 'win': renderWin(st); break;
+  }
+}
+
+/* ════════════════════════════════════════
+   HUD
+════════════════════════════════════════ */
+function updateHUD(st){
+  document.getElementById('h-day').textContent=st.day;
+  document.getElementById('h-money').textContent=st.money+'₺';
+  document.getElementById('h-score').textContent=st.score;
+  document.getElementById('h-ct').textContent=(st.customerIndex+1)+'/10';
+  const prog=document.getElementById('h-prog');prog.innerHTML='';
+  for(let i=0;i<10;i++){const d=mk('div','pd'+(i<st.customerIndex?' done':i===st.customerIndex?' cur':''));prog.appendChild(d);}
+  // Popularity
+  const pop=st.popularity||0;
+  const levels=meta?.POPULARITY_LEVELS||[];
+  const lv=levels.find(l=>pop>=l.min&&pop<=l.max)||{label:'Bilinmez',emoji:'👻',color:'#666'};
+  const maxPop=levels[levels.length-1]?.min||1000;
+  const fillPct=Math.min(100,Math.round((pop/maxPop)*100));
+  document.getElementById('pop-fill').style.width=fillPct+'%';
+  document.getElementById('pop-fill').style.background=lv.color;
+  document.getElementById('pop-label').textContent=lv.emoji+' '+lv.label;
+  document.getElementById('pop-label').style.color=lv.color;
+}
+
+/* ════════════════════════════════════════
+   SELLER
+════════════════════════════════════════ */
+function renderSeller(r,st,isMine){
+  showS('seller');
+  const c=st.currentCustomer,o=st.currentOrder;
+  if(!meta)return;
+  const ft=meta.FOOD_TYPES[o.foodType];
+  document.getElementById('cust-em').textContent=c.emoji;
+  document.getElementById('cust-nm').textContent=c.name;
+  // patience tag
+  const ptag=document.getElementById('pat-tag');
+  const p=c.patience||40;
+  if(p<=25){ptag.className='patience-tag';ptag.innerHTML='<i class="fa fa-fire"></i> Acelecilik!';}
+  else if(p<=35){ptag.className='patience-tag mid';ptag.innerHTML='<i class="fa fa-clock"></i> Aceleci';}
+  else{ptag.className='patience-tag ok';ptag.innerHTML='<i class="fa fa-face-smile"></i> Sabırlı';}
+  document.getElementById('cust-order').textContent=st.currentOrderText;
+  const pill=document.getElementById('sel-pill');
+  const sel=r.players.find(p=>p.id===st.sellerSocketId);
+  pill.style.background=isMine?'linear-gradient(135deg,#c72200,var(--r),var(--o))':'linear-gradient(135deg,#444,#555)';
+  document.getElementById('sel-pname').textContent=isMine?'Sen':(sel?.name||'?');
+  // order tags
+  const tags=document.getElementById('ord-tags');tags.innerHTML='';
+  const fb=mk('div','food-badge');fb.innerHTML=ft.emoji+' '+ft.name;tags.appendChild(fb);
+  o.wanted.forEach(k=>{
+    const t=mk('div','tag yes');
+    const qty=o.wantedQty?.[k]||1;
+    if(qty>1){t.innerHTML=`<i class="fa fa-check"></i> ${qty}x ${meta.INGREDIENTS[k].name}`;t.classList.add('qty');}
+    else t.innerHTML=`<i class="fa fa-check"></i> ${meta.INGREDIENTS[k].name}`;
+    tags.appendChild(t);
+  });
+  o.unwanted?.forEach(k=>{const t=mk('div','tag no');t.innerHTML=`<i class="fa fa-xmark"></i> ${meta.INGREDIENTS[k].name}`;tags.appendChild(t);});
+  if(o.drinkKey){const t=mk('div','tag drink');t.innerHTML=`<i class="fa fa-mug-saucer"></i> ${meta.DRINKS[o.drinkKey].emoji} ${meta.DRINKS[o.drinkKey].name}`;tags.appendChild(t);}
+  if(o.needsCut){const t=mk('div','tag cut');t.innerHTML=`<i class="fa fa-scissors"></i> Kesilmiş`;tags.appendChild(t);}
+  else if(o.explicitNoCut){const t=mk('div','tag nocut');t.innerHTML=`<i class="fa fa-ban"></i> Kesme`;tags.appendChild(t);}
+  // price estimate
+  let est=ft.basePrice;
+  o.wanted.forEach(k=>{est+=(meta.INGREDIENTS[k].priceAdd||4)*(o.wantedQty?.[k]||1);});
+  if(o.drinkKey) est+=meta.DRINKS[o.drinkKey].price;
+  est=Math.round(est*(c.tipBonus||1));
+  document.getElementById('est-price').textContent='~'+est+'₺';
+  document.getElementById('btn-kitchen').style.display=isMine?'block':'none';
+  document.getElementById('wait-sel').style.display=isMine?'none':'block';
+}
+function doKitchen(){socket.emit('send_to_kitchen');SFX.lobby();}
+
+/* ════════════════════════════════════════
+   KITCHEN
+════════════════════════════════════════ */
+function renderKitchen(r,st,isBaker){
+  showS('kitchen');
+  if(!meta)return;
+  const o=st.currentOrder,ft=meta.FOOD_TYPES[o.foodType];
+  const baker=r.players.find(p=>p.id===st.bakerSocketId);
+  const bwo=document.getElementById('bwo');
+  if(!isBaker){
+    bwo.classList.add('on');
+    document.getElementById('bwo-txt').textContent=(baker?.name||'Partner')+' hazırlıyor.\nBirazdan değerlendirme yapacaksın!';
+    document.getElementById('btn-serve').style.display='none';
+    setKitchenInteractive(false);
+  } else {
+    bwo.classList.remove('on');
+    document.getElementById('btn-serve').style.display='block';
+    setKitchenInteractive(true);
+    document.getElementById('kit-role-txt').textContent='FIRINCI — Siparişi Dinle ve Hazırla!';
+  }
+  document.getElementById('food-type-lbl').innerHTML=`<i class="fa fa-hat-chef"></i> &nbsp;${ft.emoji} ${ft.name} hazırlanıyor`;
+  // Build ingredient shelf for this food type
+  buildShelf(o.foodType, st.toppings||{});
+  // Build food workspace
+  buildFoodWS(o.foodType, st.toppings||{}, st.isCut);
+  // Drink button
+  const drinkBtn=document.getElementById('drink-btn');
+  if(o.drinkKey){
+    const dk=meta.DRINKS[o.drinkKey];
+    drinkBtn.style.display='flex';
+    if(st.hasDrink){drinkBtn.classList.add('on');drinkBtn.innerHTML=`<i class="fa fa-mug-saucer"></i> ${dk.emoji} ${dk.name} Eklendi ✓`;}
+    else{drinkBtn.classList.remove('on');drinkBtn.innerHTML=`<i class="fa fa-mug-saucer"></i> ${dk.emoji} ${dk.name} Ekle`;}
+  } else { drinkBtn.style.display='none'; }
+  // Cut status
+  const cs=document.getElementById('cut-st');
+  if(st.isCut){cs.innerHTML='<i class="fa fa-scissors"></i> Kesildi!';cs.classList.add('on');document.getElementById('t-knife').classList.add('on');}
+  else{cs.innerHTML='<i class="fa fa-circle-xmark"></i> Kesilmemiş';cs.classList.remove('on');document.getElementById('t-knife').classList.remove('on');}
+  // cut knife only for pizza
+  document.getElementById('t-knife').style.opacity=o.foodType==='pizza'?'1':'0.3';
+  document.getElementById('t-knife').style.pointerEvents=o.foodType==='pizza'?'auto':'none';
+  // update live price
+  updateLivePrice(st);
+}
+
+function setKitchenInteractive(on){
+  const pe=on?'auto':'none';
+  document.querySelectorAll('.ingr').forEach(e=>e.style.pointerEvents=pe);
+  document.getElementById('t-knife').style.pointerEvents=pe;
+  document.getElementById('t-reset').style.pointerEvents=pe;
+  document.getElementById('drink-btn').style.pointerEvents=pe;
+  document.getElementById('btn-serve').style.pointerEvents=pe;
+}
+
+function buildShelf(foodType, toppings){
+  if(!meta)return;
+  const row=document.getElementById('ingr-row');
+  row.innerHTML='';
+  const allIngr=meta.INGREDIENTS;
+  Object.entries(allIngr).forEach(([k,v])=>{
+    if(!v.foods.includes(foodType))return;
+    const div=mk('div','ingr');div.dataset.ing=k;
+    const bowlClass=getBowlClass(k);
+    const cnt=toppings[k]||0;
+    div.innerHTML=`<div class="bowl ${bowlClass}">${v.emoji}</div><div class="ingr-lbl">${v.name}</div><div class="ingr-cnt">${cnt>0?'×'+cnt:''}</div>`;
+    row.appendChild(div);
+    // events
+    div.addEventListener('touchstart',e=>{e.preventDefault();startDrag(k,e.touches[0].clientX,e.touches[0].clientY);},{passive:false});
+    div.addEventListener('mousedown',e=>{e.preventDefault();startDrag(k,e.clientX,e.clientY);});
+  });
+}
+
+function getBowlClass(k){
+  const map={sauce:'b-sauce',cheese:'b-cheese',sucuk:'b-sucuk',sosis:'b-sosis',mushroom:'b-mushroom',olive:'b-olive',meat:'b-meat',cabbage:'b-cabbage',tomato:'b-tomato',patty:'b-patty',lettuce:'b-lettuce',pickle:'b-pickle',onion:'b-onion'};
+  return map[k]||'b-sauce';
+}
+
+function buildFoodWS(foodType, toppings, isCut){
+  const area=document.getElementById('food-area');
+  area.innerHTML='';
+  if(foodType==='pizza')buildPizzaWS(area,toppings,isCut);
+  else if(foodType==='doner')buildDonerWS(area,toppings);
+  else if(foodType==='burger')buildBurgerWS(area,toppings);
+}
+
+function buildPizzaWS(area, toppings, isCut){
+  const ws=mk('div','pizza-ws');ws.id='food-ws';
+  const shadow=mk('div','p-shadow');
+  const base=mk('div','p-base');
+  const topContainer=mk('div','p-tops');topContainer.id='p-tops';
+  base.appendChild(topContainer);
+  const crust=mk('div','p-crust');
+  const canvas=document.createElement('canvas');canvas.id='p-canvas';canvas.width=200;canvas.height=200;
+  ws.appendChild(shadow);ws.appendChild(base);ws.appendChild(crust);ws.appendChild(canvas);
+  area.appendChild(ws);
+  // render toppings
+  renderPizzaToppings(toppings,isCut);
+  // canvas tap to cut
+  canvas.addEventListener('click',()=>{if(room?.state?.bakerSocketId===myId&&room?.state?.phase==='kitchen')doCut();});
+}
+
+function renderPizzaToppings(toppings,isCut){
+  const tops=document.getElementById('p-tops');if(!tops)return;tops.innerHTML='';
+  const canvas=document.getElementById('p-canvas');if(!canvas)return;
+  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,200,200);
+  if((toppings.sauce||0)>0){const l=mk('div','t-layer t-sauce');tops.appendChild(l);}
+  if((toppings.cheese||0)>0){const l=mk('div','t-layer t-cheese');tops.appendChild(l);}
+  ['sucuk','sosis','mushroom','olive'].forEach(ing=>{
+    const n=toppings[ing]||0;
+    for(let i=0;i<n;i++){
+      const a=(i*137.508)*Math.PI/180,rv=24+(i%5)*16;
+      const px=80+rv*Math.cos(a),py=80+rv*Math.sin(a);
+      const d=mk('div','t-dot');
+      const sz=ing==='sucuk'?20:ing==='olive'?14:16;
+      const col=getDotColor(ing);
+      d.style.cssText=`width:${sz}px;height:${sz}px;left:${px}px;top:${py}px;transform:translate(-50%,-50%);background:${col};box-shadow:0 2px 4px rgba(0,0,0,.45),inset 0 1px 2px rgba(255,255,255,.2);border-radius:50%;`;
+      tops.appendChild(d);
+    }
+  });
+  if(isCut){const ctx2=canvas.getContext('2d');drawCuts(ctx2,100,100,82,3);}
+}
+
+function getDotColor(ing){
+  const m={sucuk:'radial-gradient(circle at 35% 30%,#cc7a45,#8B4513,#4a2000)',sosis:'radial-gradient(circle at 35% 30%,#ffcc77,#ff9933,#cc6000)',mushroom:'radial-gradient(circle at 35% 30%,#ccbb99,#8B7355,#5a4a2a)',olive:'radial-gradient(circle at 35% 30%,#77bb77,#448844,#224422)',tomato:'radial-gradient(circle at 35% 30%,#ff7766,#cc3322,#881100)',onion:'radial-gradient(circle at 35% 30%,#ffccaa,#cc8844,#885522)'};
+  return m[ing]||'radial-gradient(circle,#999,#666)';
+}
+
+function buildDonerWS(area, toppings){
+  const ws=mk('div','doner-ws');ws.id='food-ws';
+  ws.innerHTML=`<div class="doner-wrap"><div class="doner-top"></div><div class="doner-fill"><div class="doner-tops" id="p-tops"></div></div><div class="doner-bottom"></div></div>`;
+  area.appendChild(ws);
+  const tops=ws.querySelector('#p-tops');
+  // Render items in doner
+  Object.entries(toppings).forEach(([k,n])=>{
+    for(let i=0;i<n;i++){
+      const d=mk('div','');
+      const em=meta?.INGREDIENTS[k]?.emoji||'🥙';
+      d.style.cssText=`position:absolute;font-size:18px;left:${10+Math.random()*140}px;top:${5+Math.random()*70}px;opacity:.9`;
+      d.textContent=em;
+      tops.appendChild(d);
+    }
+  });
+}
+
+function buildBurgerWS(area, toppings){
+  const ws=mk('div','burger-ws');ws.id='food-ws';
+  ws.innerHTML=`<div class="burger-stack"><div class="bun-top"></div><div class="burger-mid"><div class="burger-tops" id="p-tops"></div></div><div class="bun-bot"></div></div>`;
+  area.appendChild(ws);
+  const tops=ws.querySelector('#p-tops');
+  const ingrs=Object.entries(toppings);
+  ingrs.forEach(([k,n])=>{
+    const d=mk('div','');
+    const em=meta?.INGREDIENTS[k]?.emoji||'🥩';
+    const row=mk('div','');row.style.cssText=`display:flex;align-items:center;gap:4px;font-size:14px;font-weight:800;color:rgba(255,255,255,.8);padding:1px 8px`;
+    row.textContent=em.repeat(Math.min(n,4))+' ';
+    const lbl=mk('span','');lbl.style.cssText='font-size:10px;opacity:.6';lbl.textContent=meta?.INGREDIENTS[k]?.name||k;
+    row.appendChild(lbl);
+    tops.appendChild(row);
+  });
+}
+
+function drawCuts(ctx,cx,cy,r,n){
+  ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+  ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=2.5;ctx.shadowColor='rgba(255,255,255,.7)';ctx.shadowBlur=6;
+  for(let i=0;i<n;i++){const a=(i*Math.PI)/n;ctx.beginPath();ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a));ctx.lineTo(cx-r*Math.cos(a),cy-r*Math.sin(a));ctx.stroke();}
+}
+
+function updateLivePrice(st){
+  if(!meta||!st.currentOrder)return;
+  const o=st.currentOrder,ft=meta.FOOD_TYPES[o.foodType];
+  let earn=ft.basePrice;
+  for(const [k,n] of Object.entries(st.toppings||{})) if(meta.INGREDIENTS[k]) earn+=meta.INGREDIENTS[k].priceAdd*n;
+  if(st.hasDrink&&o.drinkKey) earn+=meta.DRINKS[o.drinkKey].price;
+  let cost=0;
+  for(const [k,n] of Object.entries(st.toppings||{})) if(meta.INGREDIENTS[k]) cost+=meta.INGREDIENTS[k].cost*n;
+  if(st.hasDrink&&o.drinkKey) cost+=meta.DRINKS[o.drinkKey].cost;
+  document.getElementById('lp-earn').textContent='+'+Math.round(earn)+'₺';
+  document.getElementById('lp-cost').textContent='-'+cost+'₺';
+}
+
+function doCut(){socket.emit('toggle_cut');SFX.cut();}
+function doDrink(){socket.emit('toggle_drink');SFX.drink();}
+function doReset(){if(confirm('Yemeği sıfırla?'))socket.emit('reset_food');}
+function doServe(){socket.emit('serve_food');SFX.serve();}
+
+/* ── Drag & Drop ────────────────────────── */
+const ghost=document.getElementById('ghost');
+function startDrag(ing,x,y){
+  drag={on:true,ing};
+  ghost.textContent=meta?.INGREDIENTS[ing]?.emoji||'?';
+  ghost.style.cssText=`display:block;left:${x}px;top:${y}px`;
+  const ws=document.getElementById('food-ws');
+  if(ws)ws.style.filter='drop-shadow(0 14px 28px rgba(0,0,0,.65)) brightness(1.2)';
+}
+function moveDrag(x,y){ghost.style.left=x+'px';ghost.style.top=y+'px';}
+function endDrag(x,y){
+  ghost.style.display='none';
+  const ws=document.getElementById('food-ws');
+  if(ws)ws.style.filter='drop-shadow(0 14px 28px rgba(0,0,0,.65))';
+  if(!drag.on)return;
+  if(isOnFood(x,y)){
+    socket.emit('add_ingredient',{ingredient:drag.ing});
+    const ing=drag.ing;
+    if(ing==='sauce')SFX.sauce();
+    else if(ing==='cheese')SFX.cheese();
+    else if(['meat','sucuk','patty'].includes(ing))SFX.meat();
+    else SFX.veg();
+    floatTxt((meta?.INGREDIENTS[ing]?.emoji||'?'),x,y,'#FFD23F');
+  }
+  drag={on:false,ing:null};
+}
+function isOnFood(x,y){
+  const ws=document.getElementById('food-ws');if(!ws)return false;
+  const r=ws.getBoundingClientRect();
+  return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom;
+}
+document.addEventListener('touchmove',e=>{if(drag.on){e.preventDefault();moveDrag(e.touches[0].clientX,e.touches[0].clientY);}},{passive:false});
+document.addEventListener('mousemove',e=>{if(drag.on)moveDrag(e.clientX,e.clientY);});
+document.addEventListener('touchend',e=>{if(drag.on)endDrag(e.changedTouches[0].clientX,e.changedTouches[0].clientY);});
+document.addEventListener('mouseup',e=>{if(drag.on)endDrag(e.clientX,e.clientY);});
+
+/* ── Timer ──────────────────────────────── */
+function renderTimer(remaining, angry, veryAngry){
+  if(room?.state?.phase!=='kitchen')return;
+  const total=45;
+  const pct=Math.max(0,remaining/total*100);
+  const fill=document.getElementById('timer-fill');
+  if(fill){
+    fill.style.width=pct+'%';
+    fill.style.background=veryAngry?'#ef4444':angry?'#f97316':pct>60?'#22c55e':'#eab308';
+  }
+  const txt=document.getElementById('timer-txt');
+  if(txt){
+    txt.textContent=(veryAngry?'🔥':'⏱') + ' ' + remaining + 's';
+    txt.className='timer-txt'+(veryAngry?' veryang':angry?' angry':'');
+  }
+  const af=document.getElementById('angry-face');
+  if(af){
+    af.style.display=angry||veryAngry?'block':'none';
+    af.textContent=veryAngry?'🤬':angry?'😡':'😤';
+  }
+  if(veryAngry&&remaining%2===0)SFX.timer_crit();
+  else if(angry&&remaining%3===0)SFX.timer_warn();
+}
+
+/* ════════════════════════════════════════
+   EVALUATION
+════════════════════════════════════════ */
+function renderEval(r,st,isSel){
+  showS('eval');
+  const er=st.evalResult,c=st.currentCustomer,o=st.currentOrder;
+  if(!meta)return;
+  const ft=meta.FOOD_TYPES[o.foodType];
+  const titles={3:'🎉 Mükemmel!',2:'😐 Fena Değil',1:'😠 Berbat!',0:'🤬 Rezalet!'};
+  document.getElementById('ev-t').textContent=titles[er.stars];
+  document.getElementById('ev-cust').textContent=c.emoji;
+  document.getElementById('ev-stars').textContent='⭐'.repeat(er.stars)+'☆'.repeat(3-er.stars);
+  document.getElementById('ev-fb').textContent=er.feedback;
+  // breakdown
+  const bd=document.getElementById('ev-breakdown');bd.innerHTML='';
+  const items=[
+    {cls:'earned',val:'+'+er.earned+'₺',lbl:'Kazanç'},
+    {cls:'cost',val:'-'+er.cost+'₺',lbl:'Maliyet'},
+    {cls:'net',val:(er.net>=0?'+':'')+er.net+'₺',lbl:'Net'},
+    {cls:'spd',val:'+'+er.timeBonus+'s',lbl:'Hız Bonus'},
+    {cls:'pop',val:(er.popularityChange>=0?'+':'')+er.popularityChange,lbl:'Popülerlik'},
+  ];
+  items.forEach(({cls,val,lbl})=>{
+    const d=mk('div','evb-item '+cls);
+    d.innerHTML=`<span class="evb-val">${val}</span><span class="evb-lbl">${lbl}</span>`;
+    bd.appendChild(d);
+  });
+  // preview
+  buildEvalPreview(er,o);
+  if(er.stars===3)SFX.stars3();
+  else if(er.stars===2)SFX.stars2();
+  else{SFX.stars0();if(er.timedOut)setTimeout(()=>SFX.stars0(),500);}
+  document.getElementById('btn-next').style.display=isSel?'block':'none';
+  document.getElementById('wait-eval').style.display=isSel?'none':'block';
+}
+
+function buildEvalPreview(er,o){
+  const preview=document.getElementById('ev-food-preview');
+  preview.innerHTML='';
+  if(!meta)return;
+  const ft=meta.FOOD_TYPES[o.foodType];
+  // Simple preview - always pizza style for now
+  const base=mk('div','ev-base');
+  const tops=mk('div','ev-tops');tops.id='ev-tops-inner';base.appendChild(tops);
+  const crust=mk('div','ev-crust');
+  const shadow=mk('div','ev-shadow');
+  preview.appendChild(base);preview.appendChild(crust);preview.appendChild(shadow);
+  // toppings
+  const t=er.snapshotToppings||{};
+  if(t.sauce>0){const l=mk('div','t-layer t-sauce');tops.appendChild(l);}
+  if(t.cheese>0){const l=mk('div','t-layer t-cheese');tops.appendChild(l);}
+  ['sucuk','sosis','mushroom','olive','meat','patty'].forEach(ing=>{
+    const n=t[ing]||0;
+    for(let i=0;i<n;i++){
+      const a=(i*137.508)*Math.PI/180,rv=18+(i%4)*12;
+      const px=45+rv*Math.cos(a),py=45+rv*Math.sin(a);
+      const d=mk('div','t-dot');const sz=ing==='sucuk'||ing==='meat'?14:11;
+      d.style.cssText=`width:${sz}px;height:${sz}px;left:${px}px;top:${py}px;transform:translate(-50%,-50%);background:${getDotColor(ing)};border-radius:50%;`;
+      tops.appendChild(d);
+    }
+  });
+  if(er.snapshotCut){
+    const c=document.createElement('canvas');c.width=110;c.height=110;
+    c.style.cssText='position:absolute;top:0;left:0;width:110px;height:110px;border-radius:50%;pointer-events:none;z-index:5';
+    drawCuts(c.getContext('2d'),55,55,44,3);
+    preview.appendChild(c);
+  }
+}
+
+function doNext(){socket.emit('next_customer');SFX.coin();}
+
+/* ════════════════════════════════════════
+   ROLE SWITCH
+════════════════════════════════════════ */
+function renderRS(r,st){
+  showS('rs');SFX.role();
+  const pd=st.day-1;
+  document.getElementById('rs-day').textContent=`🌅 Gün ${pd} tamamlandı!`;
+  const ns=r.players.find(p=>p.id===st.sellerSocketId);
+  const nb=r.players.find(p=>p.id===st.bakerSocketId);
+  document.getElementById('rs-sel').textContent=`📋 Yeni Satıcı: ${ns?.name||'?'}${st.sellerSocketId===myId?' (SEN)':''}`;
+  document.getElementById('rs-bak').textContent=`👨‍🍳 Yeni Fırıncı: ${nb?.name||'?'}${st.bakerSocketId===myId?' (SEN)':''}`;
+  const iAmSel=st.sellerSocketId===myId;
+  document.getElementById('btn-newday').style.display=iAmSel?'inline-block':'none';
+  document.getElementById('wait-rs').style.display=iAmSel?'none':'block';
+}
+function doNewDay(){socket.emit('start_new_day');SFX.lobby();}
+
+/* ════════════════════════════════════════
+   GAMEOVER / WIN
+════════════════════════════════════════ */
+function renderOver(st){
+  showS('over');SFX.stars0();setTimeout(()=>SFX.stars0(),450);
+  document.getElementById('go-day').textContent=st.day;
+  document.getElementById('go-score').textContent=st.score;
+  document.getElementById('go-custs').textContent=(st.day-1)*10+st.customerIndex;
+  document.getElementById('go-pop').textContent=st.popularity||0;
+  document.getElementById('go-perf').textContent=st.stats?.perfect||0;
+  document.getElementById('go-fail').textContent=st.stats?.failed||0;
+}
+function renderWin(st){
+  showS('win');SFX.stars3();setTimeout(()=>SFX.stars3(),700);
+  document.getElementById('wn-money').textContent=st.money+'₺';
+  document.getElementById('wn-score').textContent=st.score;
+  document.getElementById('wn-earned').textContent=(st.stats?.totalEarned||0)+'₺';
+  document.getElementById('wn-perf').textContent=st.stats?.perfect||0;
+  document.getElementById('wn-served').textContent=st.stats?.totalServed||0;
+}
+function doRestart(){socket.emit('restart_game');SFX.lobby();}
+
+/* ════════════════════════════════════════
+   CHAT
+════════════════════════════════════════ */
+const ebar=document.getElementById('ebar');
+QUICK_EMOJIS.forEach(em=>{
+  const b=mk('button','ebtn');b.textContent=em;
+  b.onclick=()=>{document.getElementById('ch-inp').value+=em;document.getElementById('ch-inp').focus();};
+  ebar.appendChild(b);
+});
+document.getElementById('ch-inp').addEventListener('keydown',e=>{if(e.key==='Enter')sendChat();});
+function toggleChat(){
+  chatOpen=!chatOpen;
+  const pop=document.getElementById('chat-pop');
+  if(chatOpen){pop.style.display='flex';requestAnimationFrame(()=>pop.classList.add('open'));unread=0;showBadge();setTimeout(()=>scrollChat(),80);document.getElementById('ch-inp').focus();}
+  else{pop.classList.remove('open');setTimeout(()=>{pop.style.display='none';},240);}
+}
+function sendChat(){
+  const inp=document.getElementById('ch-inp'),text=inp.value.trim();
+  if(!text||!socket)return;
+  socket.emit('chat_msg',{text});inp.value='';SFX.lobby();
+}
+function appendMsg(msg){
+  const box=document.getElementById('chat-msgs');
+  const emp=box.querySelector('.cempty');if(emp)emp.remove();
+  const div=mk('div','cmsg '+(msg.id===myId?'mine':'their'));
+  if(msg.id!==myId){const n=mk('div','mn');n.textContent=msg.name;div.appendChild(n);}
+  const t=mk('div','');t.textContent=msg.text;div.appendChild(t);
+  box.appendChild(div);scrollChat();
+}
+function scrollChat(){const b=document.getElementById('chat-msgs');b.scrollTop=b.scrollHeight;}
+function showBadge(){
+  const b=document.getElementById('cbadge');
+  if(unread>0){b.textContent=unread>9?'9+':unread;b.style.display='flex';}else b.style.display='none';
+}
+
+/* ════════════════════════════════════════
+   UTILS
+════════════════════════════════════════ */
+function mk(tag,cls){const el=document.createElement(tag);el.className=cls;return el;}
+function floatTxt(text,x,y,color){
+  const el=mk('div','ft');el.textContent=text;
+  el.style.cssText=`left:${x}px;top:${y}px;color:${color};text-shadow:0 2px 6px rgba(0,0,0,.6)`;
+  document.body.appendChild(el);setTimeout(()=>el.remove(),1300);
+}
+
+initSocket();
+</script>
+</body>
+</html>
